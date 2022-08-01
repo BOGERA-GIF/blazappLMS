@@ -1,0 +1,120 @@
+{% extends 'student_navbar.html' %}
+{% load static %}
+{% block title %}Request{% endblock %}
+{% block css %}
+{% endblock %}
+<style type="text/css">
+  .bs-example{
+      margin: 0px;
+
+  }
+.navbar-brand{
+font-size: 20px;
+font-family: sans-serif;
+
+}
+.col-lg-6{
+padding-left: 20%;
+}
+.jumbotron{
+margin-bottom: 0px;
+}
+body{
+background: rgb(240, 241, 233);
+}
+</style>
+</head>
+<body>
+
+
+
+{% block body %}
+
+<div class="container-fluid">
+<div class="row">
+<div class="col-sm-3" style="color: red">
+  <p style="color: blue"></p>  
+</div>
+
+
+
+<div class="col-sm-6" style="padding-top: 87px">
+    <div class="card">
+  <div class="card-header">
+          <i class="fas fa-table text-primary"></i>
+                  <h1><center><u>Book Request</u></center></h1>
+  </div>
+  <center><p class="">Note: Make sure you do not owe the library a book or fine</br>
+  </p></center>
+</div>
+
+
+
+<div class="card mb-4">
+<div class="card-body">
+
+<div class="row">
+	<div class="col-sm-4"></div>
+	<div class="form-group">
+    <form action="{% url 'request' %}" method="POST">
+    {% csrf_token %}
+  <label for="comment">Type In Book Name</label>
+  <textarea class="form-control" rows="5" id="comment" name="request"></textarea>
+  <br>
+  <a href=""><button type="submit" class="btn btn-primary"> Send</button></a>
+</form>
+<br>
+<br>
+   <div class="card-footer">
+        <div class="d-flex justify-content-center">
+
+<div style="color: blue">
+
+              {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+              </div>
+      </div>
+</div>
+
+
+	<div class="col-sm-4"></div>
+	</div>
+
+
+                      </div>
+                    </div>  
+                  </div>
+
+</div>
+
+
+
+<div class="col-sm-3" style="color: red">
+</div>
+
+</div>
+</div>
+
+    <script type="text/javascript" src="{% static 'js/jquery-2.1.3.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.dataTables.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+</body>
+
+</html>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
