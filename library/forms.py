@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from . import models
+from library.models import Chat
 
 
 
@@ -9,10 +10,12 @@ from . import models
 #form to handle issuing of books to students which will ask for the book name and ISBN and also ask for the student's name,course year and student no
 
 
-class IssueBookForm(forms.Form):
+class IssueBookForm(forms.Form):    # forms: Django validation and HTML form handling.    Form: A collection of Fields, plus their associated data. 
     isbn2 = forms.ModelChoiceField(queryset=models.Book.objects.all(), empty_label="Book Name [ISBN]", to_field_name="isbn", label="Book Details")
     name2 = forms.ModelChoiceField(queryset=models.Student.objects.all(), empty_label="Name [Course] [Year] [Student No]", to_field_name="user", label="Student Details")
-    
+    # ModelChoiceField: this will create a form that gives a user options to choose from
+
+
     isbn2.widget.attrs.update({'class': 'form-control'})
     name2.widget.attrs.update({'class':'form-control'})
 
@@ -24,4 +27,16 @@ class IssueBookForm(forms.Form):
     #to_field_name - this will take them to the field with the information related to the desired field i.e user has student details while isbn has the book details
     #queryset=models.Book.objects.all() - will get all the information requireed of the available books in the database
     #queryset=models.Student.objects.all() - will get all the information required of the available students in the database
+
+
+
+
+
+
+
+class ChatForm(forms.ModelForm):
+    class Meta:
+        model = Chat
+        fields = ('message', )
+
 

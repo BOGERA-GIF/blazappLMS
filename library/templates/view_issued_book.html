@@ -1,6 +1,6 @@
 {% extends 'admin_navbar.html' %}
 {% load static %}
-{% block title %}All Students{% endblock %}
+{% block title %}My Library{% endblock %}
 {% block css %}
 {% endblock %}
 {% block body %}
@@ -41,6 +41,7 @@ body{
                 <th>ISBN</th>
                 <th>Issued Date</th>
                 <th>Expiry Date</th>
+                <th>Days(/14)</th>
                 <th>Fine</th>
                 <th>Return</th>
             </tr>
@@ -55,7 +56,8 @@ body{
                 <td>{{i.3}}</td>
                 <td>{{i.4}}</td>
                 <td>{{i.5}}</td>
-                <td>UGX {{i.6}}</td>
+                <td>{{i.6}}</td>
+                <td>UGX {{i.7}}</td>
                   <td><a href="/delete_issue/{{i.1}}/" class="btn btn-primary" onclick="return confirm('Cormfirm Return Of Book?')">Return</a></td>  
                 
                 

@@ -1,3 +1,4 @@
+
 from library.forms import IssueBookForm
 from django.shortcuts import redirect, render,HttpResponse
 #HttpResponse: provides an inbound HTTP request to a Django web application with a text response
@@ -19,13 +20,20 @@ from .forms import IssueBookForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 #LoginRequiredMixin: Verifies that the current user is authenticated.
 from django.views.generic import ListView
+
+from django.views.generic import CreateView, DetailView, DeleteView, UpdateView, ListView
+from .forms import ChatForm
+
+
+from django.utils import timezone
+from django.urls import reverse_lazy
  
  #ListView: A page representing a list of objects. While this view is executing, self. object_list will contain the list of objects
  #NB: A QuerySet is a collection of data from a database
-
+#
 
 def index(request):
-    return render(request, "index.html")
+    return render(request, "index.html")    #render: Return an HttpResponse whose content is filled with the result of calling django.template.loader.render_to_string() with the passed arguments.
 
 
 # Found In the drop down menu of books 'Add a book' option
@@ -58,7 +66,7 @@ def add_book(request):
 
         return render(request, "add_book.html", {'alert':alert})
         # when the book has been added to the database, we defined a variable 'alert' which should show that book addition was successful
-        # and this alert ("Book is added successfully") message will be found in the "add_book.html" as shown below
+        # and this alert ("Book is added successfully") message will be found in the "add_book.html"
 
 
     return render(request, "add_book.html")
@@ -134,15 +142,16 @@ def view_issued_book(request):
         fine=0
         if d>16: # if the number of days stayed with the book exceed 16
             day=d-17
-            rate=1000/7 # rate of fine since we want the fine to be UGX 15000 after 10 days 
-            fine=math.ceil(5000+((day)*rate)) # we add a UGX 5000 because by the 17 days, it will be 3 days past the expiry date (book is supposed to be had for 14 days ) and since day=number of days - 17, that will be 17-17=0, therefore:(5000+((day)*rate)) will be (5000+(0)*1000/7)= UGX 5000 so on the 18th day, the rate starts adding 
+            rate=10000/7 # rate of fine since we want the fine to be UGX 15000 after 10 days 
+            fine=math.ceil(5000+((day)*rate)) # we add a UGX 5000 because by the 17 days, it will be 3 days past the expiry date (book is supposed to be had for 14 days ) and since day=number of days - 17, that will be 17-17=0, therefore:(5000+((day)*rate)) will be (5000+(0)*10000/7)= UGX 5000 so on the 18th day, the rate starts adding 
+            
         books = list(models.Book.objects.filter(isbn=i.isbn))  # this is a list containing all the books, .filter() filters a search, and allows to return only rows that match the search term in this case it is 'i.isbn' that means an item in isbn column
 
         students = list(models.Student.objects.filter(user=i.student_id)) # this is a list containing all the students, .filter() filters a search, and allows to return only rows that match the search term in this case it is 'i.student_id' that means an item in the student_id column
         i=0   # at 1st, there are no issued books so we make the items in the issuedBooks be 0
         for b in books:    # for any item in book QuerySet, the below codes should apply, b stands for item (we created a for loop)
             
-            t=(students[i].user,students[i].user_id,books[i].name,books[i].isbn,issdate,expdate,fine)  # we are making a turple (It stores multiple items in a single variable, in this case, it is storing it in t) with borrower's username, borrower library id, book name, isbn, the book's issue n expiry dates and the fine
+            t=(students[i].user,students[i].user_id,books[i].name,books[i].isbn,issdate,expdate,d,fine)  # we are making a turple (It stores multiple items in a single variable, in this case, it is storing it in t) with borrower's username, borrower library id, book name, isbn, the book's issue n expiry dates and the fine
             i=i+1   # when a turple t is added, the items in the issuedBooks are added by one
             details.append(t)  # from above, we defined a variable: details which is a list, here we are adding our made turple to the end of the list
     return render(request, "view_issued_book.html", {'issuedBooks':issuedBooks, 'details':details})
@@ -169,10 +178,10 @@ def student_issued_books(request):
         fine=0
         if d>16:
             day=d-17
-            rate=1000/7  
+            rate=10000/7  
             fine=math.ceil(5000+((day)*rate)) 
             
-        t=(issuedBooks[0].issued_date, issuedBooks[0].expiry_date, fine)  # t is a turple to contain issued n expiry dates and the fine
+        t=(issuedBooks[0].issued_date, issuedBooks[0].expiry_date,d, fine)  # t is a turple to contain issued n expiry dates and the fine
         li2.append(t)      # adding a turple at the end of the list li2
     return render(request,'student_issued_books.html',{'li1':li1, 'li2':li2})
 
@@ -202,7 +211,7 @@ def edit_profile(request):
     return render(request, "edit_profile.html")
 
 def delete_book(request, myid):
-    books = Book.objects.filter(id=myid)
+    books = Book.objects.filter  (id=myid)
     books.delete()
     return redirect("/view_books")
 
@@ -380,5 +389,101 @@ def delete_request(request,myid):
     request= Request.objects.filter(id=myid) 
     request.delete()
     return redirect('/adminrequest')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Admin
+class ACreateChat(LoginRequiredMixin, CreateView):
+	form_class = ChatForm
+	model = Chat
+	template_name = 'adminchatform.html'
+	success_url = reverse_lazy('alchat')
+
+
+	def form_valid(self, form):
+		self.object = form.save(commit=False)
+		self.object.user = self.request.user
+		self.object.save()
+		return super().form_valid(form)
+
+
+
+
+class AListChat(LoginRequiredMixin, ListView):
+	model = Chat
+	template_name = 'adminchatlist.html'
+
+	def get_queryset(self):
+		return Chat.objects.filter(posted_at__lt=timezone.now()).order_by('posted_at')
+
+
+
+
+
+
+# student
+
+class UCreateChat(LoginRequiredMixin, CreateView):
+	form_class = ChatForm
+	model = Chat
+	template_name = 'studentchatform.html'
+	success_url = reverse_lazy('ulchat')
+
+
+	def form_valid(self, form):
+		self.object = form.save(commit=False)
+		self.object.user = self.request.user
+		self.object.save()
+		return super().form_valid(form)
+
+
+class UListChat(LoginRequiredMixin, ListView):
+	model = Chat
+	template_name = 'studentchatlist.html'
+
+	def get_queryset(self):
+		return Chat.objects.filter(posted_at__lt=timezone.now()).order_by('posted_at')
+
+
+
+
+
+
+def delete_chat(request,myid):
+    x= Chat.objects.filter(id=myid) 
+    x.delete()
+    return redirect('/alchat')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
